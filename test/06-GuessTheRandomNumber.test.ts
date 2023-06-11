@@ -28,6 +28,23 @@ describe('GuessTheRandomNumberChallenge', () => {
      * YOUR CODE HERE
      * */
 
+    const blockNumber = await provider.getBlockNumber();
+    const block = await provider.getBlock(blockNumber - 1);
+    const currentTimestamp = (await provider.getBlock('latest')).timestamp;
+
+    const hashedData = utils.solidityKeccak256(
+      ['bytes32', 'uint256'],
+      [block.hash, currentTimestamp]
+    );
+
+    const answer = ethers.BigNumber.from(hashedData).mod(256);
+
+    const tx = await target.guess(answer, {
+      value: utils.parseEther('1'),
+    });
+
+    const receipt = await tx.wait();
+
     expect(await target.isComplete()).to.equal(true);
   });
 });

@@ -6,6 +6,7 @@ const { utils, provider } = ethers;
 
 describe('GuessTheNewNumberChallenge', () => {
   let target: Contract;
+  let solver: Contract;
   let deployer: SignerWithAddress;
   let attacker: SignerWithAddress;
 
@@ -21,12 +22,23 @@ describe('GuessTheNewNumberChallenge', () => {
     await target.deployed();
 
     target = await target.connect(attacker);
+
+    solver = await (
+      await ethers.getContractFactory('solver', attacker)
+    ).deploy(target.address);
+
+    await solver.deployed();
   });
 
   it('exploit', async () => {
-    /**
-     * YOUR CODE HERE
-     * */
+
+    //calling contract to send same variable as the random number
+
+    const tx = await solver.solve({
+      value: utils.parseEther('1'),
+    });
+
+    await tx.wait();
 
     expect(await provider.getBalance(target.address)).to.equal(0);
   });

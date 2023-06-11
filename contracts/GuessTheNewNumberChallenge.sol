@@ -11,7 +11,7 @@ contract GuessTheNewNumberChallenge {
 
     function guess(uint8 n) public payable {
         require(msg.value == 1 ether);
-        uint8 answer = uint8(keccak256(block.blockhash(block.number - 1), now));
+        uint8 answer = uint8(keccak256(block.blockhash(block.number - 1),  block.timestamp));
 
         if (n == answer) {
             msg.sender.transfer(2 ether);

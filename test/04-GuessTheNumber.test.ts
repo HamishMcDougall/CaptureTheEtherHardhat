@@ -28,6 +28,14 @@ describe('GuessTheNumberChallenge', () => {
      * YOUR CODE HERE
      * */
 
-    expect(await provider.getBalance(target.address)).to.equal(0);
+    // guess the number
+    const answer = 42;
+    await target.guess(answer, {
+      value: utils.parseEther('1'),
+    });
+    
+  
+
+   expect(await provider.getBalance(target.address)).to.equal(0);
   });
 });
