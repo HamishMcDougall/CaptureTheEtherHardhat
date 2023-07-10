@@ -20,8 +20,9 @@ contract TokenSaleChallenge {
 
     function sell(uint256 numTokens) public {
         require(balanceOf[msg.sender] >= numTokens);
-
+        //winner winner chicken dinner
         balanceOf[msg.sender] -= numTokens;
         msg.sender.transfer(numTokens * PRICE_PER_TOKEN);
     }
 }
+
